@@ -1,0 +1,160 @@
+services:
+  reverse-proxy:
+    image: traefik:v3.3
+    secrets:
+      - cf_token
+    environment:
+      - CLOUDFLARE_DNS_API_TOKEN_FILE=/run/secrets/cf_token
+      - CLOUDFLARE_HTTP_TIMEOUT=${HTTP_TIMEOUT}
+      - CLOUDFLARE_POLLING_INTERVAL=${POLLING_INTERVAL}
+      - CLOUDFLARE_PROPAGATION_TIMEOUT=${PROPAGATION_TIMEOUT}
+      - CLOUDFLARE_TTL=${TTL}
+    deploy:
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      update_config: # Start new instance before stopping existing one
+        delay: 10s
+        order: start-first
+        parallelism: 1
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.traefik.entrypoints=http"
+        - "traefik.http.routers.traefik.rule=Host(`traefik.${ROOT_DOMAIN}`)"
+        - "traefik.http.middlewares.traefik-https-redirect.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+        - "traefik.http.routers.traefik.middlewares=traefik-https-redirect"
+        - "traefik.http.routers.traefik-secure.entrypoints=https"
+        - "traefik.http.routers.traefik-secure.rule=Host(`traefik.${ROOT_DOMAIN}`)"
+        - "traefik.http.routers.traefik-secure.tls=true"
+        - "traefik.http.routers.traefik-secure.tls.certresolver=cloudflare"
+        - "traefik.http.routers.traefik-secure.tls.domains[0].main=${ROOT_DOMAIN}"
+        - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.${ROOT_DOMAIN}"
+        - "traefik.http.routers.traefik-secure.service=api@internal"
+        - "traefik.http.services.api.loadbalancer.server.port=8080"    
+        - "traefik.http.routers.traefik.middlewares=error-pages-middleware"
+    ports:
+      # HTTP
+      - target: 80
+        published: 80
+
+      # HTTPS
+      - target: 443
+        published: 443
+        
+      # Web UI (enabled by --api.insecure=true)
+      - target: 8080
+        published: 8080
+    networks:
+      - traefik
+      - internal
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./acme.json:/acme.json
+      # - ./data/config.yml:/config.yml:ro
+
+  tunnel:
+    image: cloudflare/cloudflared
+    command: tunnel run
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        delay: 30s
+        order: start-first
+        monitor: 20s
+    networks:
+      - traefik
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+      - TUNNEL_LOGLEVEL=debug
+
+  error-pages:
+    image: tarampampam/error-pages:2.26.0
+    environment:
+      TEMPLATE_NAME: l7-dark
+    networks:
+      - traefik
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        delay: 20s
+        order: start-first
+        monitor: 10s
+      labels:
+        traefik.enable: 'true'
+        traefik.swarm.network: traefik
+
+
+        # use as "fallback" for any NON-registered services (with priority below normal)
+        traefik.http.routers.error-pages-router.rule: HostRegexp(`.+`)
+        traefik.http.routers.error-pages-router.priority: 10
+        # should say that all of your services work on https
+        traefik.http.routers.error-pages-router.entrypoints: https
+        traefik.http.routers.error-pages-router.tls: 'true'
+        traefik.http.routers.error-pages-router.middlewares: error-pages-middleware
+        # "errors" middleware settings
+        traefik.http.middlewares.error-pages-middleware.errors.status: 400-599
+        traefik.http.middlewares.error-pages-middleware.errors.service: error-pages-service
+        traefik.http.middlewares.error-pages-middleware.errors.query: /{status}.html
+        # define service properties
+        traefik.http.services.error-pages-service.loadbalancer.server.port: 8080
+
+  cloudflare-companion:
+    image: ghcr.io/tiredofit/docker-traefik-cloudflare-companion:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    environment:
+      - TIMEZONE=Europe/Berlin
+
+      - LOG_TYPE=CONSOLE
+      - LOG_LEVEL=DEBUG
+      - DRY_RUN=FALSE
+
+      - TRAEFIK_VERSION=2
+      - RC_TYPE=CNAME
+
+      - TARGET_DOMAIN=${ROOT_DOMAIN}
+      - REFRESH_ENTRIES=TRUE
+
+      - DOCKER_SWARM_MODE=TRUE
+
+      - DOMAIN1_EXCLUDED_SUB_DOMAINS=int
+
+      # - ENABLE_TRAEFIK_POLL=TRUE
+      # - TRAEFIK_POLL_URL=http://traefik.${ROOT_DOMAIN}
+      - TRAEFIK_FILTER_LABEL=traefik.constraint
+      - TRAEFIK_FILTER=proxy-public # only externally expose docker services with "traefik.constraint=proxy-public" label
+
+      - DOMAIN1=${ROOT_DOMAIN}
+      - DOMAIN1_ZONE_ID=${ZONE_ID}
+      - DOMAIN1_PROXIED=TRUE
+    networks:
+      - internal
+    secrets:
+      - cf_token
+      
+networks:
+  traefik:
+    external: true
+  internal:
+
+secrets:
+  cf_token:
+    external: true
