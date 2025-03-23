@@ -65,7 +65,6 @@ http:
         stsSeconds: 15768000
     secHeaders2:
       headers:
-        browserXssFilter: true
         contentTypeNosniff: true
         frameDeny: true
         customFrameOptionsValue: SAMEORIGIN
