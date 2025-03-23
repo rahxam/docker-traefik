@@ -51,3 +51,37 @@ certificatesResolvers:
         resolvers:
           - "1.1.1.1:53"
           - "1.0.0.1:53"
+http:
+  middlewares:
+    secHeaders:
+      headers:
+        browserXssFilter: true
+        contentTypeNosniff: true
+        frameDeny: true
+        sslRedirect: true
+        #HSTS Configuration
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 15768000
+    secHeaders2:
+      headers:
+        browserXssFilter: true
+        contentTypeNosniff: true
+        frameDeny: true
+        customFrameOptionsValue: SAMEORIGIN
+        referrerPolicy: same-origin
+        sslRedirect: true
+        #HSTS Configuration
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 15768000
+        forceSTSHeader: true
+        sslForceHost: true
+        browserXssFilter: true
+        customResponseHeaders:
+          server: "" # removes "Server" header
+          X-Powered-By: "" # Removes X-Powered-By
+          X-Robots-Tag: "none,noarchive,nosnippet,notranslate,noimageindex"
+          #https://securityheaders.com/ is camera+mic enough?
+          Permissions-Policy:	camera=('self'), microphone=('self'), autoplay=('self'), payment=(), screen-wake-lock=('self'), geolocation=()
+          Feature-Policy:	"camera 'self'; microphone 'self'; payment 'none'; screen-wake-lock 'self'; geolocation 'none'; usb 'none'; vr 'none';"
