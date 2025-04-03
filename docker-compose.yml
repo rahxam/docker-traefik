@@ -165,7 +165,7 @@ services:
       GID: "${GID-1000}"
       COLLECTIONS: "crowdsecurity/linux crowdsecurity/traefik"
     volumes:
-      - ./acquis.yaml:/etc/crowdsec/acquis.yaml
+      - ./acquis.yml:/etc/crowdsec/acquis.yaml
       - crowdsec-db:/var/lib/crowdsec/data/
       - crowdsec-config:/etc/crowdsec/
       - ./traefik/logs:/var/log/traefik/:ro
