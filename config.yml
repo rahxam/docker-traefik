@@ -10,6 +10,10 @@ http:
       forwardauth:
         address: http://bouncer-traefik:8080/api/v1/forwardAuth
         trustForwardHeader: true
+    nextcloud_striprefix_push:
+      stripPrefix:
+        prefixes:
+          - "/push"
     secHeaders:
       headers:
         browserXssFilter: true
