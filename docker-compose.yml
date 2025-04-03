@@ -63,6 +63,7 @@ services:
       - ./traefik.yml:/etc/traefik/traefik.yml:ro
       - ./acme.json:/acme.json:ro
       - acme:/acme
+      - "./traefik/logs:/var/log/traefik"
       # - ./data/config.yml:/config.yml:ro
 
   tunnel:
@@ -151,8 +152,54 @@ services:
     secrets:
       - cf_token
 
+  crowdsec:
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        delay: 20s
+        order: start-first
+        monitor: 10s
+    image: crowdsecurity/crowdsec:latest
+    environment:
+      GID: "${GID-1000}"
+      COLLECTIONS: "crowdsecurity/linux crowdsecurity/traefik"
+    volumes:
+      - ./acquis.yaml:/etc/crowdsec/acquis.yaml
+      - crowdsec-db:/var/lib/crowdsec/data/
+      - crowdsec-config:/etc/crowdsec/
+      - ./traefik/logs:/var/log/traefik/:ro
+    networks:
+      - traefik
+    security_opt:
+      - no-new-privileges:true
+
+  bouncer-traefik:
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        delay: 20s
+        order: start-first
+        monitor: 10s
+    image: docker.io/fbonalair/traefik-crowdsec-bouncer:latest
+    environment:
+      CROWDSEC_BOUNCER_API_KEY: safjdsafjödsakfsöafdsf889asfshfkjdsaf98ufdshajfhsafk
+      CROWDSEC_AGENT_HOST: crowdsec:8080
+    networks:
+      - traefik
+    depends_on:
+      - crowdsec
+    security_opt:
+      - no-new-privileges:true
+
+
 volumes:
   acme:  
+  crowdsec-db:
+  crowdsec-config:
+
+
 networks:
   traefik:
     external: true

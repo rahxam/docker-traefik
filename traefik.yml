@@ -10,6 +10,8 @@ entryPoints:
   http:
     address: ":80"
     http:
+      middlewares:
+        - crowdsec-bouncer@file
       redirections:
         entryPoint:
           to: https
@@ -53,6 +55,10 @@ certificatesResolvers:
           - "1.0.0.1:53"
 http:
   middlewares:
+    crowdsec-bouncer:
+      forwardauth:
+        address: http://bouncer-traefik:8080/api/v1/forwardAuth
+        trustForwardHeader: true
     secHeaders:
       headers:
         browserXssFilter: true
