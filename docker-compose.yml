@@ -184,7 +184,7 @@ services:
         monitor: 10s
     image: docker.io/fbonalair/traefik-crowdsec-bouncer:latest
     environment:
-      CROWDSEC_BOUNCER_API_KEY: safjdsafjödsakfsöafdsf889asfshfkjdsaf98ufdshajfhsafk
+      CROWDSEC_BOUNCER_API_KEY: NLqXFAzKAU6YZlQGOv8x4ghhQqEBDE5EdR+ewWhdcEU
       CROWDSEC_AGENT_HOST: crowdsec:8080
     networks:
       - traefik
