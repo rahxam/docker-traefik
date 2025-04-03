@@ -1,8 +1,10 @@
 log:
-  format: json
   level: INFO
+  filePath: "/var/log/traefik/traefik.log"
+  maxBackups: 10
 accessLog:
-  format: json
+  filePath: "/var/log/traefik/traefik.log"
+  maxBackups: 10
 api:
   dashboard: true
   insecure: true
