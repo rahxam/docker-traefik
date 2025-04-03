@@ -41,8 +41,9 @@ entryPoints:
         - 2a06:98c0::/29
         - 2c0f:f248::/32
     http:
-      middlewares:
-        - crowdsec-bouncer@file
+      # middlewares:
+        # - crowdsec-bouncer@file
+        # - cloudflarewarp@file
       redirections:
         entryPoint:
           to: https
@@ -52,9 +53,10 @@ entryPoints:
     forwardedHeaders:
       # reuse list of Cloudflare Trusted IP's above for HTTPS requests
       trustedIPs: *trustedIps
-    http:
-      middlewares:
-        - crowdsec-bouncer@file
+    # http:
+      # middlewares:
+        # - crowdsec-bouncer@file
+        # - cloudflarewarp@file
   dns:
     address: ":53"
   dns-udp:
@@ -69,6 +71,8 @@ metrics:
 serversTransport:
   insecureSkipVerify: true
 providers:
+  file:
+    filename: /config.yml
   swarm:
     endpoint: "unix:///var/run/docker.sock"
     exposedByDefault: false
@@ -90,58 +94,3 @@ certificatesResolvers:
         resolvers:
           - "1.1.1.1:53"
           - "1.0.0.1:53"
-https:
-  middlewares:
-    cloudflarewarp:
-      plugin:
-        cloudflarewarp:
-          disableDefault: false
-          trustip: # Trust IPS not required if disableDefault is false - we will allocate Cloud Flare IPs automatically
-            - "2400:cb00::/32"
-    crowdsec-bouncer:
-      forwardauth:
-        address: http://bouncer-traefik:8080/api/v1/forwardAuth
-        trustForwardHeader: true
-http:
-  middlewares:
-    cloudflarewarp:
-      plugin:
-        cloudflarewarp:
-          disableDefault: false
-          trustip: # Trust IPS not required if disableDefault is false - we will allocate Cloud Flare IPs automatically
-            - "2400:cb00::/32"
-    crowdsec-bouncer:
-      forwardauth:
-        address: http://bouncer-traefik:8080/api/v1/forwardAuth
-        trustForwardHeader: true
-    secHeaders:
-      headers:
-        browserXssFilter: true
-        contentTypeNosniff: true
-        frameDeny: true
-        sslRedirect: true
-        #HSTS Configuration
-        stsIncludeSubdomains: true
-        stsPreload: true
-        stsSeconds: 15768000
-    secHeaders2:
-      headers:
-        contentTypeNosniff: true
-        frameDeny: true
-        customFrameOptionsValue: SAMEORIGIN
-        referrerPolicy: same-origin
-        sslRedirect: true
-        #HSTS Configuration
-        stsIncludeSubdomains: true
-        stsPreload: true
-        stsSeconds: 15768000
-        forceSTSHeader: true
-        sslForceHost: true
-        browserXssFilter: true
-        customResponseHeaders:
-          server: "" # removes "Server" header
-          X-Powered-By: "" # Removes X-Powered-By
-          X-Robots-Tag: "none,noarchive,nosnippet,notranslate,noimageindex"
-          #https://securityheaders.com/ is camera+mic enough?
-          Permissions-Policy:	camera=('self'), microphone=('self'), autoplay=('self'), payment=(), screen-wake-lock=('self'), geolocation=()
-          Feature-Policy:	"camera 'self'; microphone 'self'; payment 'none'; screen-wake-lock 'self'; geolocation 'none'; usb 'none'; vr 'none';"

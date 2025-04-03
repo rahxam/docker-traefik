@@ -64,7 +64,7 @@ services:
       - ./acme.json:/acme.json:ro
       - acme:/acme
       - "./traefik/logs:/var/log/traefik"
-      # - ./data/config.yml:/config.yml:ro
+      - ./config.yml:/config.yml:ro
 
   tunnel:
     image: cloudflare/cloudflared
