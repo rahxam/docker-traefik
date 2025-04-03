@@ -4,7 +4,6 @@ log:
   maxBackups: 10
 accessLog:
   filePath: "/var/log/traefik/traefik.log"
-  maxBackups: 10
 api:
   dashboard: true
   insecure: true
