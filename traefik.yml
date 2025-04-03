@@ -3,20 +3,33 @@ log:
   filePath: "/var/log/traefik/traefik.log"
   maxBackups: 10
 accessLog:
+  format: json
+  filters:
+    statusCodes:
+    - "200-299"
+    - "400-599"
+  bufferingSize: 0
+  fields:
+    headers:
+      defaultMode: drop
+      names:
+        User-Agent: keep
   filePath: "/var/log/traefik/access.log"
 api:
   dashboard: true
   insecure: true
 experimental:
   plugins:
-    cloudflarewarp:
-      modulename: github.com/BetterCorp/cloudflarewarp
-      version: v1.3.0
+    cloudflare:
+      moduleName: github.com/agence-gaya/traefik-plugin-cloudflare
+      version: v1.0.0
 entryPoints:
   http:
     address: ":80"
     forwardedHeaders:
+      # insecure: true
       trustedIPs: &trustedIps
+        - 10.0.0.0/16
         # start of Clouflare public IP list for HTTP requests, remove this if you don't use it; https://www.cloudflare.com/de-de/ips/
         - 103.21.244.0/22
         - 103.22.200.0/22
@@ -40,10 +53,12 @@ entryPoints:
         - 2405:8100::/32
         - 2a06:98c0::/29
         - 2c0f:f248::/32
+    proxyProtocol:
+      # insecure: true
+      trustedIPs: *trustedIps
     http:
-      # middlewares:
-        # - crowdsec-bouncer@file
-        # - cloudflarewarp@file
+      middlewares:
+        - crowdsec-bouncer@file
       redirections:
         entryPoint:
           to: https
@@ -51,12 +66,15 @@ entryPoints:
   https:
     address: ":443"
     forwardedHeaders:
+      # insecure: true
       # reuse list of Cloudflare Trusted IP's above for HTTPS requests
       trustedIPs: *trustedIps
-    # http:
-      # middlewares:
-        # - crowdsec-bouncer@file
-        # - cloudflarewarp@file
+    proxyProtocol:
+      # insecure: true
+      trustedIPs: *trustedIps
+    http:
+      middlewares:
+        - crowdsec-bouncer@file
   dns:
     address: ":53"
   dns-udp:
