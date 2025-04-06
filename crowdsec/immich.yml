@@ -1,6 +1,0 @@
----
-source: docker
-container_name_regexp:
- - immich-stack_immich-server*
-labels:
-  type: immich

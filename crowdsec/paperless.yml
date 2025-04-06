@@ -1,6 +1,0 @@
----
-source: docker
-container_name_regexp:
- - paperless-stack_webserver*
-labels:
-  type: paperless
