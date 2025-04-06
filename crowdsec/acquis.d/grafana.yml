@@ -1,0 +1,6 @@
+---
+source: docker
+container_name_regexp:
+ - monitoring-stack_grafana*
+labels:
+  type: grafana

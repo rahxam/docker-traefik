@@ -165,11 +165,11 @@ services:
       GID: "${GID-1000}"
       COLLECTIONS: "crowdsecurity/linux crowdsecurity/traefik"
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - ./crowdsec/:/etc/crowdsec/
       - crowdsec-db:/var/lib/crowdsec/data/
-      - crowdsec-config:/etc/crowdsec/
       - ./traefik/logs:/var/log/traefik/:ro
-      - /home/docker/mnt/fast/nextcloud-data/data/nextcloud.log:/var/log/nextcloud/nextcloud.log:ro
+      - /home/docker/mnt/fast/nextcloud_data/data/nextcloud.log:/var/log/nextcloud/nextcloud.log:ro
     networks:
       - traefik
     security_opt:
@@ -185,7 +185,7 @@ services:
         monitor: 10s
     image: docker.io/fbonalair/traefik-crowdsec-bouncer:latest
     environment:
-      CROWDSEC_BOUNCER_API_KEY: NLqXFAzKAU6YZlQGOv8x4ghhQqEBDE5EdR+ewWhdcEU
+      CROWDSEC_BOUNCER_API_KEY: OF4PV57Gj9/l6OpaaYiGpykdVqoE7zFOFceCS/Y5uRw
       CROWDSEC_AGENT_HOST: crowdsec:8080
     networks:
       - traefik
