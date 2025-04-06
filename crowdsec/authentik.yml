@@ -1,0 +1,6 @@
+---
+source: docker
+container_name_regexp:
+ - authentik-stack_authentik*
+labels:
+  type: authentik

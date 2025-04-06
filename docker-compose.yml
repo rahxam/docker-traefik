@@ -165,10 +165,11 @@ services:
       GID: "${GID-1000}"
       COLLECTIONS: "crowdsecurity/linux crowdsecurity/traefik"
     volumes:
-      - ./acquis.yml:/etc/crowdsec/acquis.yaml
+      - ./crowdsec/:/etc/crowdsec/
       - crowdsec-db:/var/lib/crowdsec/data/
       - crowdsec-config:/etc/crowdsec/
       - ./traefik/logs:/var/log/traefik/:ro
+      - /home/docker/mnt/fast/nextcloud-data/data/nextcloud.log:/var/log/nextcloud/nextcloud.log:ro
     networks:
       - traefik
     security_opt:
