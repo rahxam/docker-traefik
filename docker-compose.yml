@@ -164,6 +164,7 @@ services:
     environment:
       GID: "${GID-1000}"
       COLLECTIONS: "crowdsecurity/linux crowdsecurity/traefik"
+      DISABLE_SCENARIOS: "crowdsecurity/http-probing"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./crowdsec/:/etc/crowdsec/
