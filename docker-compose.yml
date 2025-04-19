@@ -60,11 +60,11 @@ services:
       # So that Traefik can listen to the Docker events
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./traefik.yml:/etc/traefik/traefik.yml:ro
-      - ./acme.json:/acme.json:ro
+      - /home/docker/mnt/fast/traefik_data/traefik.yml:/etc/traefik/traefik.yml:ro
+      - /home/docker/mnt/fast/traefik_data/acme.json:/acme.json:ro
       - acme:/acme
-      - "./traefik/logs:/var/log/traefik"
-      - ./config.yml:/config.yml:ro
+      - "/home/docker/mnt/fast/traefik_data/traefik/logs:/var/log/traefik"
+      - /home/docker/mnt/fast/traefik_data/config.yml:/config.yml:ro
 
   tunnel:
     image: cloudflare/cloudflared
@@ -167,9 +167,9 @@ services:
       DISABLE_SCENARIOS: "crowdsecurity/http-probing"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./crowdsec/:/etc/crowdsec/
+      - /home/docker/mnt/fast/traefik_data/crowdsec/:/etc/crowdsec/
       - crowdsec-db:/var/lib/crowdsec/data/
-      - ./traefik/logs:/var/log/traefik/:ro
+      - /home/docker/mnt/fast/traefik_data/traefik/logs:/var/log/traefik/:ro
       - /home/docker/mnt/fast/nextcloud_data/data/nextcloud.log:/var/log/nextcloud/nextcloud.log:ro
     networks:
       - traefik
