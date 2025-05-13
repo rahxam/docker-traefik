@@ -63,7 +63,7 @@ services:
       - /home/docker/mnt/fast/traefik_data/traefik_docker/traefik.yml:/etc/traefik/traefik.yml:ro
       - /home/docker/mnt/fast/traefik_data/traefik_docker/acme.json:/acme.json:ro
       - acme:/acme
-      - "/home/docker/mnt/fast/traefik_data/traefik_docker/traefik/logs:/var/log/traefik"
+      - "/home/docker/mnt/fast/traefik_data/traefik_docker/logs:/var/log/traefik"
       - /home/docker/mnt/fast/traefik_data/traefik_docker/config.yml:/config.yml:ro
 
   # tunnel:
