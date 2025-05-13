@@ -169,7 +169,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /home/docker/mnt/fast/traefik_data/crowdsec/:/etc/crowdsec/
       - crowdsec-db:/var/lib/crowdsec/data/
-      - /home/docker/mnt/fast/traefik_data/traefik_docker/traefik/logs:/var/log/traefik/:ro
+      - /home/docker/mnt/fast/traefik_data/traefik_docker/logs:/var/log/traefik/:ro
       - /home/docker/mnt/fast/nextcloud_data/data/nextcloud.log:/var/log/nextcloud/nextcloud.log:ro
     networks:
       - traefik
