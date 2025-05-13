@@ -60,27 +60,27 @@ services:
       # So that Traefik can listen to the Docker events
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
-      - /home/docker/mnt/fast/traefik_data/traefik.yml:/etc/traefik/traefik.yml:ro
-      - /home/docker/mnt/fast/traefik_data/acme.json:/acme.json:ro
+      - /home/docker/mnt/fast/traefik_data/traefik_docker/traefik.yml:/etc/traefik/traefik.yml:ro
+      - /home/docker/mnt/fast/traefik_data/traefik_docker/acme.json:/acme.json:ro
       - acme:/acme
-      - "/home/docker/mnt/fast/traefik_data/traefik/logs:/var/log/traefik"
-      - /home/docker/mnt/fast/traefik_data/config.yml:/config.yml:ro
+      - "/home/docker/mnt/fast/traefik_data/traefik_docker/traefik/logs:/var/log/traefik"
+      - /home/docker/mnt/fast/traefik_data/traefik_docker/config.yml:/config.yml:ro
 
-  tunnel:
-    image: cloudflare/cloudflared
-    command: tunnel run
-    deploy:
-      mode: replicated
-      replicas: 1
-      update_config:
-        delay: 30s
-        order: start-first
-        monitor: 20s
-    networks:
-      - traefik
-    environment:
-      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
-      - TUNNEL_LOGLEVEL=debug
+  # tunnel:
+  #   image: cloudflare/cloudflared
+  #   command: tunnel run
+  #   deploy:
+  #     mode: replicated
+  #     replicas: 1
+  #     update_config:
+  #       delay: 30s
+  #       order: start-first
+  #       monitor: 20s
+  #   networks:
+  #     - traefik
+  #   environment:
+  #     - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+  #     - TUNNEL_LOGLEVEL=debug
 
   error-pages:
     image: tarampampam/error-pages:2.26.0
@@ -169,7 +169,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /home/docker/mnt/fast/traefik_data/crowdsec/:/etc/crowdsec/
       - crowdsec-db:/var/lib/crowdsec/data/
-      - /home/docker/mnt/fast/traefik_data/traefik/logs:/var/log/traefik/:ro
+      - /home/docker/mnt/fast/traefik_data/traefik_docker/traefik/logs:/var/log/traefik/:ro
       - /home/docker/mnt/fast/nextcloud_data/data/nextcloud.log:/var/log/nextcloud/nextcloud.log:ro
     networks:
       - traefik
